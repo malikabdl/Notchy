@@ -22,8 +22,12 @@ pub fn load_data(name: String) -> Result<serde_json::Value, String> {
 #[tauri::command]
 pub fn save_data(name: String, value: serde_json::Value) -> Result<(), String> {
     let path = file(&name)?;
-    std::fs::create_dir_all(path.parent().unwrap()).map_err(|e| e.to_string())?;
-    std::fs::write(path, serde_json::to_string(&value).map_err(|e| e.to_string())?).map_err(|e| e.to_string())
+    let parent = path.parent().ok_or("no parent directory")?;
+    std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    let json = serde_json::to_string(&value).map_err(|e| e.to_string())?;
+    let tmp_path = parent.join(format!(".{name}.tmp"));
+    std::fs::write(&tmp_path, json).map_err(|e| e.to_string())?;
+    std::fs::rename(&tmp_path, &path).map_err(|e| e.to_string())
 }
 
 /// Lets the notch show previews of files on the shelf, and returns their sizes in bytes.
@@ -43,6 +47,9 @@ pub fn shelf_add(app: AppHandle, paths: Vec<String>) -> Vec<Option<u64>> {
 /// Dangerous executables are revealed in Explorer (/select) rather than directly executed.
 #[tauri::command]
 pub fn open_path(path: String) {
+    if path.starts_with('-') || path.starts_with('/') {
+        return;
+    }
     let p = std::path::Path::new(&path);
     if p.exists() {
         if crate::downloads::is_dangerous_executable(p) {
@@ -50,5 +57,20 @@ pub fn open_path(path: String) {
         } else {
             let _ = std::process::Command::new("explorer").arg(&path).spawn();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn validates_file_names() {
+        assert!(file("todo").is_ok());
+        assert!(file("water-log").is_ok());
+        assert!(file("../evil").is_err());
+        assert!(file("test/sub").is_err());
+        assert!(file("").is_err());
+        assert!(file("with space").is_err());
     }
 }

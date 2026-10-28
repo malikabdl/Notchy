@@ -546,6 +546,7 @@
     type AllSettings = Settings & {
       weatherCity: { latitude: number; longitude: number } | null;
       smallLyrics: boolean;
+      capsLockPeek?: boolean;
       shortcuts: Shortcut[];
       mascot: boolean;
       minimalNotch: boolean;

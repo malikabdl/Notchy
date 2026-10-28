@@ -147,7 +147,7 @@ fn now_playing() -> Option<NowPlaying> {
 pub(crate) fn read_art(thumbnail: IRandomAccessStreamReference) -> Option<String> {
     let stream = thumbnail.OpenReadAsync().ok()?.get().ok()?;
     let size = stream.Size().ok()? as u32;
-    if size == 0 {
+    if size == 0 || size > 16 * 1024 * 1024 {
         return None;
     }
     let reader = DataReader::CreateDataReader(&stream.GetInputStreamAt(0).ok()?).ok()?;

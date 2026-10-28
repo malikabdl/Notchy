@@ -48,6 +48,8 @@ pub struct Settings {
     /// Show the line being sung in the small notch. Looks up lyrics for every
     /// song played (sends title and artist to LRCLIB).
     small_lyrics: bool,
+    /// Show Caps Lock status peek when toggled (requires low-level keyboard hook).
+    pub caps_lock_peek: bool,
     /// Buttons on the shortcuts page.
     pub shortcuts: Vec<Shortcut>,
 }
@@ -94,6 +96,7 @@ impl Default for Settings {
             mirror_notifications: true,
             calendar_url: String::new(),
             small_lyrics: true,
+            caps_lock_peek: true,
             shortcuts: default_shortcuts(),
         }
     }
@@ -111,9 +114,12 @@ pub fn get_settings() -> Settings {
 #[tauri::command]
 pub fn save_settings(app: AppHandle, settings: Settings) -> Result<(), String> {
     let path = path();
-    std::fs::create_dir_all(path.parent().unwrap()).map_err(|e| e.to_string())?;
+    let parent = path.parent().ok_or("no parent directory")?;
+    std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     let json = serde_json::to_string_pretty(&settings).map_err(|e| e.to_string())?;
-    std::fs::write(&path, json).map_err(|e| e.to_string())?;
+    let tmp_path = parent.join(".settings.tmp");
+    std::fs::write(&tmp_path, json).map_err(|e| e.to_string())?;
+    std::fs::rename(&tmp_path, &path).map_err(|e| e.to_string())?;
     let _ = app.emit("settings", &settings);
     Ok(())
 }

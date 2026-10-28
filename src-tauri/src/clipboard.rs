@@ -16,7 +16,7 @@ use windows::Win32::System::DataExchange::{
     OpenClipboard, RegisterClipboardFormatW, SetClipboardData,
 };
 use windows::Win32::System::LibraryLoader::GetModuleHandleW;
-use windows::Win32::System::Memory::{GlobalAlloc, GlobalLock, GlobalSize, GlobalUnlock, GMEM_MOVEABLE};
+use windows::Win32::System::Memory::{GlobalAlloc, GlobalFree, GlobalLock, GlobalSize, GlobalUnlock, GMEM_MOVEABLE};
 use windows::Win32::System::Ole::{CF_DIB, CF_UNICODETEXT};
 use windows::Win32::UI::WindowsAndMessaging::{
     CreateWindowExW, DefWindowProcW, DispatchMessageW, GetMessageW, RegisterClassW, HWND_MESSAGE, MSG,
@@ -241,11 +241,13 @@ unsafe fn write(data: &Data) -> bool {
         let Ok(mem) = GlobalAlloc(GMEM_MOVEABLE, bytes.len()) else { return false };
         let p = GlobalLock(mem) as *mut u8;
         if p.is_null() {
+            let _ = GlobalFree(mem);
             return false;
         }
         std::ptr::copy_nonoverlapping(bytes.as_ptr(), p, bytes.len());
         let _ = GlobalUnlock(mem);
         if OpenClipboard(None).is_err() {
+            let _ = GlobalFree(mem);
             return false;
         }
         SELF_COPY.store(true, Ordering::Relaxed);
@@ -254,6 +256,7 @@ unsafe fn write(data: &Data) -> bool {
         let _ = CloseClipboard();
         if !ok {
             SELF_COPY.store(false, Ordering::Relaxed);
+            let _ = GlobalFree(mem);
         }
         ok
     }
@@ -276,7 +279,11 @@ pub fn thumbnail(dib: &[u8], max: u32) -> Option<(Vec<u8>, u32, u32)> {
     let masks = if compression == 3 && header == 40 { 12 } else { 0 };
     let pixels = header + masks;
     let stride = (w * bpp / 8 + 3) & !3;
-    if dib.len() < pixels + stride * h {
+    let total_pixels = match stride.checked_mul(h).and_then(|s| pixels.checked_add(s)) {
+        Some(t) => t,
+        None => return None,
+    };
+    if dib.len() < total_pixels {
         return None;
     }
     let scale = (w.max(h) as f64 / max as f64).max(1.0);
