@@ -865,9 +865,6 @@
 
   .notch {
     --spring: cubic-bezier(0.34, 1.32, 0.5, 1);
-    /* Plain black, like the real Dynamic Island. A hairline edge keeps it
-       visible on a black wallpaper; color only appears to mean something. */
-    --edge: rgba(255, 255, 255, 0.16);
     position: absolute;
     top: 0;
     left: 50%;
@@ -877,16 +874,16 @@
     background: #000;
     border-radius: 0 0 var(--r) var(--r);
     box-shadow:
-      0 0 0 0.5px var(--edge),
-      0 14px 34px -16px rgba(0, 0, 0, 0.95);
+      0 4px 14px rgba(0, 0, 0, 0.22),
+      0 10px 30px rgba(0, 0, 0, 0.35);
   }
   .notch.open {
     box-shadow:
-      0 0 0 0.5px var(--edge),
-      0 18px 40px -16px rgba(0, 0, 0, 0.95);
+      0 6px 18px rgba(0, 0, 0, 0.2),
+      0 16px 42px rgba(0, 0, 0, 0.4);
   }
 
-  /* "Ears": concave fillets that blend the notch into the screen's top edge. */
+  /* "Ears": concave fillets that blend the notch seamlessly into the screen's top edge. */
   .notch::before,
   .notch::after {
     content: "";
@@ -898,15 +895,12 @@
       width 0.45s,
       height 0.45s;
   }
-  /* The ears carry the hairline along their curve, covering the straight edge beside them. */
   .notch::before {
     right: 100%;
     background: radial-gradient(
       circle at 0 100%,
       transparent calc(var(--e) - 0.5px),
-      var(--edge) calc(var(--e) - 0.5px),
-      var(--edge) var(--e),
-      #000 calc(var(--e) + 0.3px)
+      #000 calc(var(--e) + 0.5px)
     );
   }
   .notch::after {
@@ -914,9 +908,7 @@
     background: radial-gradient(
       circle at 100% 100%,
       transparent calc(var(--e) - 0.5px),
-      var(--edge) calc(var(--e) - 0.5px),
-      var(--edge) var(--e),
-      #000 calc(var(--e) + 0.3px)
+      #000 calc(var(--e) + 0.5px)
     );
   }
 
@@ -1250,7 +1242,7 @@
 
   /* "Notch minimal": a plain black line, no glow. */
   .notch.minimal {
-    box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
   }
   .minimal .ambient {
     opacity: 0;
