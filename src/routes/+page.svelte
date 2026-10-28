@@ -864,6 +864,9 @@
 
   .notch {
     --spring: cubic-bezier(0.34, 1.32, 0.5, 1);
+    /* Plain black, like the real Dynamic Island. A hairline edge keeps it
+       visible on a black wallpaper; color only appears to mean something. */
+    --edge: rgba(255, 255, 255, 0.16);
     position: absolute;
     top: 0;
     left: 50%;
@@ -873,16 +876,16 @@
     background: #000;
     border-radius: 0 0 var(--r) var(--r);
     box-shadow:
-      0 4px 14px -2px rgba(0, 0, 0, 0.4),
-      0 12px 32px -4px rgba(0, 0, 0, 0.35);
+      0 0 0 0.5px var(--edge),
+      0 14px 34px -16px rgba(0, 0, 0, 0.95);
   }
   .notch.open {
     box-shadow:
-      0 8px 24px -2px rgba(0, 0, 0, 0.45),
-      0 20px 48px -4px rgba(0, 0, 0, 0.4);
+      0 0 0 0.5px var(--edge),
+      0 18px 40px -16px rgba(0, 0, 0, 0.95);
   }
 
-  /* "Ears": concave fillets that blend the notch seamlessly into the screen's top edge. */
+  /* "Ears": concave fillets that blend the notch into the screen's top edge. */
   .notch::before,
   .notch::after {
     content: "";
@@ -894,31 +897,36 @@
       width 0.45s,
       height 0.45s;
   }
+  /* The ears carry the hairline along their curve, covering the straight edge beside them. */
   .notch::before {
     right: 100%;
     background: radial-gradient(
       circle at 0 100%,
-      transparent var(--e),
-      #000 calc(var(--e) + 0.5px)
+      transparent calc(var(--e) - 0.5px),
+      var(--edge) calc(var(--e) - 0.5px),
+      var(--edge) var(--e),
+      #000 calc(var(--e) + 0.3px)
     );
   }
   .notch::after {
     left: 100%;
     background: radial-gradient(
       circle at 100% 100%,
-      transparent var(--e),
-      #000 calc(var(--e) + 0.5px)
+      transparent calc(var(--e) - 0.5px),
+      var(--edge) calc(var(--e) - 0.5px),
+      var(--edge) var(--e),
+      #000 calc(var(--e) + 0.3px)
     );
   }
 
-  /* Ambient light for music / tint or charging. Seamless when idle. */
+  /* A faint light rising from the bottom edge, for depth. */
   .ambient {
     position: absolute;
     inset: auto 0 0;
     height: 70%;
     border-radius: inherit;
     pointer-events: none;
-    background: transparent;
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.09), transparent);
     transition:
       opacity 0.45s ease,
       height 0.45s ease;
@@ -1239,9 +1247,9 @@
     stroke: #fb923c;
   }
 
-  /* "Notch minimal": a plain black line, seamless with soft shadow. */
+  /* "Notch minimal": a plain black line, no glow. */
   .notch.minimal {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.08);
   }
   .minimal .ambient {
     opacity: 0;

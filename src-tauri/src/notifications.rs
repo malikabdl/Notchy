@@ -45,26 +45,11 @@ pub fn start(app: AppHandle) {
         let mut stamps = Stamps::new();
         let mut stamp = stamps.latest();
         let mut last_full = Instant::now();
-        let mut last_activity = Instant::now();
-        let mut poll_interval = Duration::from_millis(200);
 
         loop {
-            std::thread::sleep(poll_interval);
+            std::thread::sleep(Duration::from_millis(200));
             let now = stamps.latest();
             let woken = now != stamp;
-
-            if woken {
-                last_activity = Instant::now();
-                poll_interval = Duration::from_millis(200);
-            } else {
-                let quiet = last_activity.elapsed();
-                if quiet > Duration::from_secs(45) {
-                    poll_interval = Duration::from_millis(1000);
-                } else if quiet > Duration::from_secs(15) {
-                    poll_interval = Duration::from_millis(500);
-                }
-            }
-
             // A full look only when Windows logged a new notification (or every 30 s, just in case).
             if !woken && last_full.elapsed() < Duration::from_secs(30) {
                 continue;
@@ -124,9 +109,9 @@ impl Stamps {
         out
     }
 
-    /// Newest notification time over all apps. Re-scans for newly installed apps every 60 s.
+    /// Newest notification time over all apps.
     fn latest(&mut self) -> u64 {
-        if self.scanned.elapsed() > Duration::from_secs(60) {
+        if self.scanned.elapsed() > Duration::from_secs(10) {
             self.keys = Self::scan();
             self.scanned = Instant::now();
         }
