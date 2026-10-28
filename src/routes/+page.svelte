@@ -891,25 +891,20 @@
     top: 0;
     width: var(--e);
     height: var(--e);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    pointer-events: none;
     transition:
-      width 0.45s,
-      height 0.45s;
+      width 0.62s var(--spring),
+      height 0.62s var(--spring);
   }
   .notch::before {
     right: 100%;
-    background: radial-gradient(
-      circle at 0 100%,
-      transparent calc(var(--e) - 0.5px),
-      #000 calc(var(--e) + 0.5px)
-    );
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M0 0 A100 100 0 0 1 100 100 L100 0 Z' fill='%23000'/%3E%3C/svg%3E");
   }
   .notch::after {
     left: 100%;
-    background: radial-gradient(
-      circle at 100% 100%,
-      transparent calc(var(--e) - 0.5px),
-      #000 calc(var(--e) + 0.5px)
-    );
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M100 0 A100 100 0 0 0 0 100 L0 0 Z' fill='%23000'/%3E%3C/svg%3E");
   }
 
   /* A faint light rising from the bottom edge, for depth. */
