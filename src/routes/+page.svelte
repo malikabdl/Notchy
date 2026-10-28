@@ -25,9 +25,7 @@
   // page still runs and draws (sent from an animation frame, which only comes while
   // the page renders). Without beats for a while, Rust reloads the page.
   const logJs = (msg: string) => invoke("log_js", { msg }).catch(() => {});
-  window.addEventListener("error", (e) => logJs(`${e.message} (${String(e.filename).split("/").pop()}:${e.lineno})`));
-  window.addEventListener("unhandledrejection", (e) => logJs(`unhandled: ${e.reason?.stack ?? e.reason}`));
-  setInterval(() => requestAnimationFrame(() => invoke("heartbeat").catch(() => {})), 5000);
+  let heartbeatInterval: ReturnType<typeof setInterval>;
 
   // Sizes from notchy.md §4 (logical px).
   // Open pages are 154 tall: a 16 px status row (battery, date, time) above the page.
@@ -445,6 +443,12 @@
   }
 
   onMount(() => {
+    const onError = (e: ErrorEvent) => logJs(`${e.message} (${String(e.filename).split("/").pop()}:${e.lineno})`);
+    const onUnhandled = (e: PromiseRejectionEvent) => logJs(`unhandled: ${e.reason?.stack ?? e.reason}`);
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onUnhandled);
+    heartbeatInterval = setInterval(() => requestAnimationFrame(() => invoke("heartbeat").catch(() => {})), 5000);
+
     const unlisten = listen<boolean>("notch-hover", (e) => {
       hovered = e.payload;
       clearTimeout(closeTimer);
@@ -622,6 +626,9 @@
       clearTimeout(tick);
       clearTimeout(blinkTimer);
       clearTimeout(sleepTimer);
+      clearInterval(heartbeatInterval);
+      window.removeEventListener("error", onError);
+      window.removeEventListener("unhandledrejection", onUnhandled);
     };
   });
 
@@ -857,9 +864,6 @@
 
   .notch {
     --spring: cubic-bezier(0.34, 1.32, 0.5, 1);
-    /* Plain black, like the real Dynamic Island. A hairline edge keeps it
-       visible on a black wallpaper; color only appears to mean something. */
-    --edge: rgba(255, 255, 255, 0.16);
     position: absolute;
     top: 0;
     left: 50%;
@@ -869,16 +873,16 @@
     background: #000;
     border-radius: 0 0 var(--r) var(--r);
     box-shadow:
-      0 0 0 0.5px var(--edge),
-      0 14px 34px -16px rgba(0, 0, 0, 0.95);
+      0 4px 14px -2px rgba(0, 0, 0, 0.4),
+      0 12px 32px -4px rgba(0, 0, 0, 0.35);
   }
   .notch.open {
     box-shadow:
-      0 0 0 0.5px var(--edge),
-      0 18px 40px -16px rgba(0, 0, 0, 0.95);
+      0 8px 24px -2px rgba(0, 0, 0, 0.45),
+      0 20px 48px -4px rgba(0, 0, 0, 0.4);
   }
 
-  /* "Ears": concave fillets that blend the notch into the screen's top edge. */
+  /* "Ears": concave fillets that blend the notch seamlessly into the screen's top edge. */
   .notch::before,
   .notch::after {
     content: "";
@@ -890,36 +894,31 @@
       width 0.45s,
       height 0.45s;
   }
-  /* The ears carry the hairline along their curve, covering the straight edge beside them. */
   .notch::before {
     right: 100%;
     background: radial-gradient(
       circle at 0 100%,
-      transparent calc(var(--e) - 0.5px),
-      var(--edge) calc(var(--e) - 0.5px),
-      var(--edge) var(--e),
-      #000 calc(var(--e) + 0.3px)
+      transparent var(--e),
+      #000 calc(var(--e) + 0.5px)
     );
   }
   .notch::after {
     left: 100%;
     background: radial-gradient(
       circle at 100% 100%,
-      transparent calc(var(--e) - 0.5px),
-      var(--edge) calc(var(--e) - 0.5px),
-      var(--edge) var(--e),
-      #000 calc(var(--e) + 0.3px)
+      transparent var(--e),
+      #000 calc(var(--e) + 0.5px)
     );
   }
 
-  /* A faint light rising from the bottom edge, for depth. */
+  /* Ambient light for music / tint or charging. Seamless when idle. */
   .ambient {
     position: absolute;
     inset: auto 0 0;
     height: 70%;
     border-radius: inherit;
     pointer-events: none;
-    background: linear-gradient(to top, rgba(255, 255, 255, 0.09), transparent);
+    background: transparent;
     transition:
       opacity 0.45s ease,
       height 0.45s ease;
@@ -1240,9 +1239,9 @@
     stroke: #fb923c;
   }
 
-  /* "Notch minimal": a plain black line, no glow. */
+  /* "Notch minimal": a plain black line, seamless with soft shadow. */
   .notch.minimal {
-    box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   }
   .minimal .ambient {
     opacity: 0;

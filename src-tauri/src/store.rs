@@ -40,9 +40,15 @@ pub fn shelf_add(app: AppHandle, paths: Vec<String>) -> Vec<Option<u64>> {
 }
 
 /// Opens a file or folder the user put on the shelf.
+/// Dangerous executables are revealed in Explorer (/select) rather than directly executed.
 #[tauri::command]
 pub fn open_path(path: String) {
-    if std::path::Path::new(&path).exists() {
-        let _ = std::process::Command::new("explorer").arg(&path).spawn();
+    let p = std::path::Path::new(&path);
+    if p.exists() {
+        if crate::downloads::is_dangerous_executable(p) {
+            let _ = std::process::Command::new("explorer").arg(format!("/select,{}", p.display())).spawn();
+        } else {
+            let _ = std::process::Command::new("explorer").arg(&path).spawn();
+        }
     }
 }

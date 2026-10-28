@@ -17,7 +17,7 @@ Notchy dianggap berhasil kalau:
 
 **Pengguna:** saya sendiri dan beberapa teman. Repo dan installer kini publik di GitHub (lihat bagian 9), tapi tidak dipromosikan.
 
-**Status:** v0.2.3 (26 Oktober 2026). Kode di GitHub `RamantyaDS/Notchy` (publik sejak 20 Okt 2026; riwayat diringkas jadi satu commit, kata "Nusa" dibersihkan). Installer: halaman Releases repo itu.
+**Status:** v0.2.4 (28 Oktober 2026). Kode di GitHub `RamantyaDS/Notchy` (publik sejak 20 Okt 2026; riwayat diringkas jadi satu commit, kata "Nusa" dibersihkan). Installer: halaman Releases repo itu.
 
 ---
 
@@ -277,6 +277,7 @@ Setiap langkah selesai = DoD-nya terpenuhi + dites sendiri di laptop.
 | v0.2.1 | 22 Okt 2026 | Sakelar "Pakai fitur minum air" di Settings; cek update tiap jam dan setelah bangun dari sleep. (Pemicu: teman di v0.1.2 tidak kunjung ter-update karena Notchy-nya tidak dibuka ulang.) |
 | v0.2.2 | 23 Okt 2026 | Sisa unduhan yang gagal/dibatalkan (`.crdownload`/`.part` yang tidak bertambah) tidak lagi tampil terus sebagai "Mengunduh…". Hanya tes otomatis; uji langsung dilewati. |
 | v0.2.3 | 26 Okt 2026 | Paket polesan (bagian 5G): baris status di notch terbuka, halaman Air/To-do/Timer dirapikan, peek bercincin baterai, notch minimal, mata menyapa, sakelar Mata dan Notch minimal di tray; SHA-256 di catatan rilis; FAQ dan link masukan di README |
+| v0.2.4 | 28 Okt 2026 | Audit keamanan, konkurensi, & performa: isolasi executable berbahaya, mouse hook lock-free atomik, adaptive backoff notifikasi, CSP ketat, pembersihan lifecycle, pipeline CI/CD, unit tests vitest, dan frame seamless dengan soft shadow |
 
 **Cara membuat rilis baru** (sejak v0.1.2, satu perintah)
 1. Pastikan semua perubahan sudah di-commit, lalu `.\scripts\release.ps1 <versi> "catatan rilis"`.

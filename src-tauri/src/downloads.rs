@@ -160,13 +160,29 @@ pub fn step(seen: &mut HashMap<PathBuf, Seen>, now: HashMap<PathBuf, u64>, at: I
     Step { growing, finished }
 }
 
-/// Opens a finished download. Only files in the Downloads folder.
+/// Whether a file is an executable or script that could run code if opened directly.
+pub fn is_dangerous_executable(path: &Path) -> bool {
+    let Some(ext) = path.extension().and_then(|e| e.to_str()) else {
+        return false;
+    };
+    matches!(
+        ext.to_ascii_lowercase().as_str(),
+        "exe" | "msi" | "bat" | "cmd" | "ps1" | "vbs" | "vbe" | "js" | "jse" | "wsf" | "wsh" | "scr" | "pif" | "com" | "hta" | "reg"
+    )
+}
+
+/// Opens a finished download safely. Only files in the Downloads folder.
+/// Executable files are revealed in Explorer (/select) rather than launched directly.
 #[tauri::command]
 pub fn open_download(path: String) {
     let path = PathBuf::from(path);
     let Some(dir) = downloads_dir() else { return };
     if path.parent() == Some(dir.as_path()) && path.is_file() {
-        let _ = std::process::Command::new("explorer").arg(&path).spawn();
+        if is_dangerous_executable(&path) {
+            let _ = std::process::Command::new("explorer").arg(format!("/select,{}", path.display())).spawn();
+        } else {
+            let _ = std::process::Command::new("explorer").arg(&path).spawn();
+        }
     }
 }
 
@@ -219,5 +235,18 @@ mod tests {
         assert_eq!(final_name("Unconfirmed plan.pdf.crdownload"), Some(Some("Unconfirmed plan.pdf".into())));
         assert_eq!(final_name("report.pdf"), None);
         assert_eq!(final_name(".crdownload"), None);
+    }
+
+    #[test]
+    fn identifies_dangerous_executables() {
+        assert!(is_dangerous_executable(Path::new("malware.exe")));
+        assert!(is_dangerous_executable(Path::new("script.BAT")));
+        assert!(is_dangerous_executable(Path::new("installer.MSI")));
+        assert!(is_dangerous_executable(Path::new("test.ps1")));
+        assert!(is_dangerous_executable(Path::new("payload.vbs")));
+        assert!(!is_dangerous_executable(Path::new("document.pdf")));
+        assert!(!is_dangerous_executable(Path::new("photo.png")));
+        assert!(!is_dangerous_executable(Path::new("archive.zip")));
+        assert!(!is_dangerous_executable(Path::new("no_ext")));
     }
 }
