@@ -55,18 +55,6 @@
   // Pages of the open notch, switched with the dots or the mouse wheel.
   const ALL_PAGES = ["now", "pomodoro", "water", "todo", "shelf", "clipboard", "shortcuts"] as const;
   type PageName = (typeof ALL_PAGES)[number];
-  const PAGE_LABELS: Record<PageName, string> = {
-    now: "Pemutar Musik",
-    pomodoro: "Fokus Pomodoro",
-    water: "Minum Air",
-    todo: "Catatan To-Do",
-    shelf: "Laci File",
-    clipboard: "Papan Klip",
-    shortcuts: "Pintasan",
-  };
-  let hoveredPage = $state<string | null>(null);
-  let showPageLabel = $state(false);
-  let pageLabelTimer: ReturnType<typeof setTimeout> | undefined;
 
   // The water page goes away when the water feature is turned off in Settings.
   let waterEnabled = $state(true);
@@ -430,9 +418,6 @@
     if (Date.now() - lastWheel < 350 || Math.abs(e.deltaY) < 4) return;
     lastWheel = Date.now();
     page = (page + (e.deltaY > 0 ? 1 : -1) + pages.length) % pages.length;
-    showPageLabel = true;
-    clearTimeout(pageLabelTimer);
-    pageLabelTimer = setTimeout(() => (showPageLabel = false), 1200);
   }
 
   // Long press (still, on a non-button spot) pins the notch open, or lets it go.
@@ -649,7 +634,6 @@
       calendarTimers.forEach(clearTimeout);
       clearTimeout(openTimer);
       clearTimeout(closeTimer);
-      clearTimeout(pageLabelTimer);
       clearTimeout(tick);
       clearTimeout(blinkTimer);
       clearTimeout(sleepTimer);
@@ -864,45 +848,16 @@
       <button
         class="arrow"
         class:next={step > 0}
-        onclick={() => {
-          page = (page + step + pages.length) % pages.length;
-          showPageLabel = true;
-          clearTimeout(pageLabelTimer);
-          pageLabelTimer = setTimeout(() => (showPageLabel = false), 1200);
-        }}
+        onclick={() => (page = (page + step + pages.length) % pages.length)}
         aria-label={step > 0 ? "Halaman berikutnya" : "Halaman sebelumnya"}
         in:fade={{ duration: 200, delay: 200 }}
       >
         <svg viewBox="0 0 24 24"><path d={step > 0 ? "M9 6l6 6-6 6" : "M15 6l-6 6 6 6"} /></svg>
       </button>
     {/each}
-    {#if hoveredPage || showPageLabel}
-      <div class="page-tooltip" in:fade={{ duration: 150 }} out:fade={{ duration: 150 }}>
-        {hoveredPage ?? PAGE_LABELS[pages[page]]}
-      </div>
-    {/if}
-    <div
-      class="pager"
-      role="tablist"
-      tabindex="-1"
-      in:fade={{ duration: 200, delay: 200 }}
-      onpointerleave={() => (hoveredPage = null)}
-    >
+    <div class="pager" role="tablist" in:fade={{ duration: 200, delay: 200 }}>
       {#each pages as name, i}
-        <button
-          role="tab"
-          aria-selected={i === page}
-          aria-label={PAGE_LABELS[name]}
-          title={PAGE_LABELS[name]}
-          class:on={i === page}
-          onpointerenter={() => (hoveredPage = PAGE_LABELS[name])}
-          onclick={() => {
-            page = i;
-            showPageLabel = true;
-            clearTimeout(pageLabelTimer);
-            pageLabelTimer = setTimeout(() => (showPageLabel = false), 1200);
-          }}
-        ></button>
+        <button role="tab" aria-selected={i === page} aria-label={name} class:on={i === page} onclick={() => (page = i)}></button>
       {/each}
     </div>
   {/if}
@@ -1164,24 +1119,6 @@
     background: #fff;
   }
 
-  .page-tooltip {
-    position: absolute;
-    bottom: 22px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 10.5px;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.95);
-    background: rgba(18, 18, 22, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-    padding: 2px 10px;
-    border-radius: 999px;
-    backdrop-filter: blur(10px);
-    white-space: nowrap;
-    pointer-events: none;
-    z-index: 10;
-  }
 
   /* Camera / mic indicators on the closed notch. */
   .dots {

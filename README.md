@@ -43,7 +43,7 @@ An elegant, interactive Dynamic Island at the top of your screen that tracks wha
 
 - 🎨 **Frameless Ambient Aesthetics**: Harsh borders replaced with smooth, diffuse drop-shadows that blend seamlessly into any light or dark wallpaper.
 - ⚡ **Ergonomic Hover Intent**: Added a ~90ms intentional hover threshold so accidental cursor flicks across top browser tabs won't trigger popups, paired with a 220ms graceful exit cushion.
-- 🧭 **Spatial Pager & Wheel Navigation**: Smooth mouse wheel switching across all 7 views with floating active view tooltips (*Music Player, Pomodoro, Water Reminder, To-Do, File Shelf, Clipboard, Shortcuts*).
+- 🧭 **Smooth Wheel Navigation**: Seamless mouse wheel switching across all views (*Music Player, Pomodoro, Water Reminder, To-Do, File Shelf, Clipboard, Shortcuts*).
 - 🎶 **Polished Player Experience**: Marquee text scrolling on hover for long song/artist titles, interactive scrubber bar with real-time hovering timestamp tooltip (`01:45`).
 - 📋 **Micro-Feedback Clipboard**: Instant visual confirmation badge (`✓ Tersalin!`) when copying items, with distinct tag badges for text vs. image snippets.
 - 💡 **Tucked Breathing Pulse**: Subtle ambient glow when collapsed if background audio is playing or a timer is actively running.
@@ -188,7 +188,7 @@ Notchy adalah pulau dinamis interaktif (*Dynamic Island*) di bagian atas layar W
 ### Fitur Baru v0.2.3:
 - **Tampilan Tanpa Garis Kaku**: Border putih digantikan dengan bayangan halus (*soft ambient shadow*) yang menyatu natural dengan wallpaper.
 - **Ergonomi Kursor Anti-Kaget**: Jeda hover terukur 90ms mencegah notch terbuka saat kursor mouse hanya melintas cepat ke tab browser, dilengkapi *cushioning* 220ms saat kursor menjauh.
-- **Navigasi Halaman dengan Scroll Wheel**: Gulir mouse wheel untuk berpindah antar halaman dengan badge indikator halaman aktif (*Pemutar Musik, Fokus Pomodoro, Minum Air, Catatan To-Do, Laci File, Papan Klip, Pintasan*).
+- **Navigasi Halaman dengan Scroll Wheel**: Gulir mouse wheel untuk berpindah antar halaman secara mulus (*Pemutar Musik, Fokus Pomodoro, Minum Air, Catatan To-Do, Laci File, Papan Klip, Pintasan*).
 - **Player Lebih Interaktif**: Teks judul lagu panjang bergerak otomatis (*marquee scroll*) saat disentuh kursor, scrubber bar menebal dengan tooltip penunjuk menit & detik (`01:45`).
 - **Papan Klip Responsif**: Micro-feedback instan `"✓ Tersalin!"` saat kartu diklik, plus penanda jenis konten (Teks vs Gambar).
 - **Breathing Pulse Saat Tucked**: Garis notch berdenyut cahaya lembut ketika diminimalkan jika ada lagu yang berputar atau timer yang aktif.
