@@ -42,11 +42,30 @@
     seek(((e.clientX - r.left) / r.width) * media.duration);
   }
 
-  let metaEl = $state<HTMLElement>();
+  let lineWrapTitle = $state<HTMLElement>();
+  let lineWrapArtist = $state<HTMLElement>();
   let titleEl = $state<HTMLElement>();
   let artistEl = $state<HTMLElement>();
-  let titleShift = $derived(titleEl && metaEl ? Math.max(0, titleEl.scrollWidth - metaEl.clientWidth) : 0);
-  let artistShift = $derived(artistEl && metaEl ? Math.max(0, artistEl.scrollWidth - metaEl.clientWidth) : 0);
+  let titleShift = $state(0);
+  let artistShift = $state(0);
+
+  function measure() {
+    if (titleEl && lineWrapTitle) {
+      const diff = titleEl.scrollWidth - lineWrapTitle.clientWidth;
+      titleShift = diff > 4 ? diff : 0;
+    }
+    if (artistEl && lineWrapArtist) {
+      const diff = artistEl.scrollWidth - lineWrapArtist.clientWidth;
+      artistShift = diff > 4 ? diff : 0;
+    }
+  }
+
+  $effect(() => {
+    track.title;
+    track.artist;
+    media.album;
+    requestAnimationFrame(measure);
+  });
 
   let hoverTime = $state<string | null>(null);
   let hoverX = $state(0);
@@ -74,7 +93,8 @@
       </div>
       <div
         class="meta"
-        bind:this={metaEl}
+        role="presentation"
+        onpointerenter={measure}
         style="--title-shift: -{titleShift}px; --artist-shift: -{artistShift}px;"
       >
         {#if !withLyrics}
@@ -83,10 +103,10 @@
             <Bars live={media.playing} />
           </div>
         {/if}
-        <div class="line-wrap">
+        <div class="line-wrap" bind:this={lineWrapTitle}>
           <div class="title" bind:this={titleEl} class:marquee={titleShift > 0}>{track.title}</div>
         </div>
-        <div class="line-wrap">
+        <div class="line-wrap artist-line" bind:this={lineWrapArtist}>
           <div class="artist" bind:this={artistEl} class:marquee={artistShift > 0}>{[track.artist, media.album].filter(Boolean).join(" - ")}</div>
         </div>
       </div>
@@ -215,20 +235,40 @@
     overflow: hidden;
     white-space: nowrap;
     width: 100%;
+    height: 19px;
+  }
+  .line-wrap.artist-line {
+    height: 16px;
+    margin-top: 2px;
   }
   .title,
   .artist {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+  .title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 19px;
+  }
+  .artist {
+    font-size: 12px;
+    line-height: 16px;
+    color: rgba(255, 255, 255, 0.55);
   }
   .meta:hover .title.marquee {
-    display: inline-block;
+    display: block;
+    width: max-content;
     text-overflow: clip;
     animation: marquee-title 5s ease-in-out infinite alternate;
   }
   .meta:hover .artist.marquee {
-    display: inline-block;
+    display: block;
+    width: max-content;
     text-overflow: clip;
     animation: marquee-artist 5s ease-in-out infinite alternate;
   }
@@ -247,15 +287,6 @@
     80%, 100% {
       transform: translateX(var(--artist-shift, 0px));
     }
-  }
-  .title {
-    font-size: 14px;
-    font-weight: 600;
-  }
-  .artist {
-    margin-top: 2px;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.55);
   }
 
   .progress {
