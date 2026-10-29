@@ -36,7 +36,7 @@
     rest: { w: 150, h: 30, r: 14, e: 10 },
     // The island's width depends on what it shows (lib/island.ts).
     island: { w: 200, h: 30, r: 14, e: 10 },
-    charging: { w: 172, h: 30, r: 14, e: 10 },
+    charging: { w: 200, h: 30, r: 14, e: 10 },
     peek: { w: 310, h: 60, r: 19, e: 13 },
     shot: { w: 360, h: 96, r: 24, e: 16 },
     notify: { w: 380, h: 72, r: 22, e: 14 },
@@ -672,9 +672,6 @@
 >
   {#if pinned && paged && !mirror}<i class="pin" title="Terkunci terbuka · tekan lama untuk melepas"></i>{/if}
   <div class="ambient"></div>
-  {#if power.battery && power.charging}
-    <div class="charge-bar" style:--prog="{power.percent}%"></div>
-  {/if}
 
   <!-- Battery, date and time above every open page (the clock page shows them big already). -->
   {#if withStatus}
@@ -723,14 +720,14 @@
     </div>
   {/if}
 
-  <!-- While charging: battery percent with bolt, and the time. -->
+  <!-- While charging: a battery ring with a bolt, and the time. -->
   <div class="layer charge" class:on={view === "charging"}>
-    <div class="charge-info">
-      <span class="charge-bolt">⚡</span>
-      <span class="charge-percent">{power.percent}%</span>
-      <span class="charge-sep">·</span>
-      <span class="charge-time">{time}</span>
-    </div>
+    <svg class="ring" viewBox="0 0 20 20">
+      <circle cx="10" cy="10" r="8" />
+      <circle cx="10" cy="10" r="8" class="fill" pathLength="100" stroke-dasharray="{power.percent} 100" />
+      <path d="M10.6 5.5 7.5 10.6h2.4l-.5 3.9 3.1-5.1h-2.4z" />
+    </svg>
+    <span class="charge-time">{time}</span>
   </div>
 
   <div class="layer clock" class:on={view === "clock"}>
@@ -1031,83 +1028,31 @@
 
   .charge {
     flex-direction: row;
-    align-items: center;
-    justify-content: center;
+    gap: 34px;
   }
-  .charge-info {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    font-variant-numeric: tabular-nums;
+  .ring {
+    width: 20px;
+    height: 20px;
+    transform: rotate(-90deg);
   }
-  .charge-bolt {
-    font-size: 11.5px;
-    color: #34d399;
-    filter: drop-shadow(0 0 4px rgba(52, 211, 153, 0.6));
-    animation: bolt-shimmer 2.2s ease-in-out infinite;
+  .ring circle {
+    fill: none;
+    stroke: rgba(52, 211, 153, 0.25);
+    stroke-width: 2.4;
   }
-  @keyframes bolt-shimmer {
-    0%, 100% {
-      opacity: 0.85;
-      transform: scale(0.96);
-    }
-    50% {
-      opacity: 1;
-      transform: scale(1.06);
-      filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.95));
-    }
+  .ring .fill {
+    stroke: #34d399;
+    stroke-linecap: round;
   }
-  .charge-percent {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: #34d399;
-    letter-spacing: -0.2px;
-  }
-  .charge-sep {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.35);
-    margin: 0 1px;
+  .ring path {
+    fill: #34d399;
+    transform: rotate(90deg);
+    transform-origin: center;
   }
   .charge-time {
-    font-size: 14.5px;
+    font-size: 15px;
     font-weight: 700;
-    color: #ffffff;
-  }
-
-  /* Top green line bar with soft ambient glow when charging */
-  .charge-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: var(--prog, 100%);
-    height: 2.5px;
-    background: linear-gradient(90deg, #059669 0%, #10b981 40%, #34d399 100%);
-    box-shadow:
-      0 0 8px 1.5px rgba(52, 211, 153, 0.75),
-      0 2px 10px rgba(16, 185, 129, 0.45);
-    border-radius: 0 999px 999px 0;
-    pointer-events: none;
-    z-index: 15;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: charge-bar-pulse 3s ease-in-out infinite;
-  }
-  .tucked .charge-bar {
-    display: none;
-  }
-  @keyframes charge-bar-pulse {
-    0%, 100% {
-      opacity: 0.85;
-      box-shadow:
-        0 0 6px 1px rgba(52, 211, 153, 0.65),
-        0 2px 8px rgba(16, 185, 129, 0.35);
-    }
-    50% {
-      opacity: 1;
-      box-shadow:
-        0 0 10px 2.5px rgba(52, 211, 153, 0.95),
-        0 3px 14px rgba(16, 185, 129, 0.6);
-    }
+    font-variant-numeric: tabular-nums;
   }
 
   /* Previous / next page, on the notch's sides. */
