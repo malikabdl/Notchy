@@ -233,12 +233,10 @@
           <small>Otomatis melebar saat ada unduhan/unggahan berkecepatan tinggi (&ge; {settings.netSpeedThresholdDownKb ?? 500} KB/s)</small>
         </span>
       </label>
-      {#if settings.netSpeedIsland === true}
-        <div class="nested-fields">
-          {@render field("netSpeedThresholdDownKb", "Unduh minimum", "KB/s")}
-          {@render field("netSpeedThresholdUpKb", "Unggah minimum", "KB/s")}
-        </div>
-      {/if}
+      <div class="nested-fields">
+        {@render field("netSpeedThresholdDownKb", "Unduh minimum", "KB/s")}
+        {@render field("netSpeedThresholdUpKb", "Unggah minimum", "KB/s")}
+      </div>
       <label class="field check">
         <input
           type="checkbox"
